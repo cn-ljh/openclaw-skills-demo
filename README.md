@@ -67,6 +67,14 @@ cp -r openclaw-skills-demo/<skill-name> ~/.openclaw/workspace/skills/
 
 每个 skill 都有独立的配置文件，**首次使用前必须根据你的环境修改配置**。配置文件中以 `<YOUR_...>` 开头的值是占位符，需要替换为实际值。
 
+## 📖 如何从零构建 Skill
+
+想了解这个 Skill 是怎么通过与 AI 对话、从零构建出来的？
+
+👉 [从零构建 OpenClaw Skill：以 meeting-minutes 为例](docs/building-meeting-minutes-skill.md)
+
+涵盖完整的对话过程、设计决策、Bug 修复、测试验证和开源发布流程。
+
 ## License
 
 MIT
