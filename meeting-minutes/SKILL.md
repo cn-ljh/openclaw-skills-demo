@@ -47,7 +47,7 @@ EMAIL_TO = 'your-email@example.com'
 
 1. **AWS 账号**：需要有 S3 和 Transcribe 权限的 IAM 凭证
 2. **S3 Bucket**：手动创建或运行 `aws s3 mb s3://<your-bucket> --region <region>`
-3. **imap-smtp-email skill**：用于发送邮件，需提前配置 SMTP 账号
+3. **imap-smtp-email skill**：用于发送邮件，从 [ClawHub](https://clawhub.com) 安装：`clawhub install imap-smtp-email`，安装后运行 `bash setup.sh` 配置 SMTP 账号
 4. **Python 依赖**：`pip install boto3 requests`
 
 ### IAM 权限

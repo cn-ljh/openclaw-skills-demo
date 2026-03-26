@@ -27,7 +27,7 @@ A collection of [OpenClaw](https://github.com/openclaw/openclaw) skills for comm
 **前置条件：**
 - AWS 账号（需要 S3 + Transcribe 权限）
 - Python 3 + boto3
-- [imap-smtp-email skill](https://github.com/nicobailon/imap-smtp-email) 用于邮件发送
+- [imap-smtp-email skill](https://clawhub.com) — 从 ClawHub 安装：`clawhub install imap-smtp-email`
 
 **快速开始：**
 
