@@ -27,11 +27,11 @@ GitHub: [cn-ljh/openclaw-skills-demo](https://github.com/cn-ljh/openclaw-skills-
 
 直接用自然语言描述需求，不需要指定技术细节：
 
-> "帮我创建一个 meeting-minutes skill。我发音频或视频文件给你，你自动转录、生成会议纪要、发邮件给我。用 AWS Transcribe 做转录，直接调 boto3，不要搞 Serverless 中间层。邮件用 imap-smtp-email skill 发。"
+> "帮我创建一个 meeting-minutes skill。我发音频或视频文件给你，你自动转录、生成会议纪要、发邮件给我。用 AWS Transcribe 做转录，邮件用 imap-smtp-email skill 发。"
 
 **要点**：
 - 说清楚**输入**（音频/视频文件）和**输出**（邮件 = 纪要 + 转录原文）
-- 如果有技术偏好可以说明（比如"直接调 API，不要 Serverless"）
+- 如果有技术偏好可以说明（比如"直接调 API"）
 - 不说也行，AI 会自己选择方案
 
 AI 会生成完整的 Skill 结构：
