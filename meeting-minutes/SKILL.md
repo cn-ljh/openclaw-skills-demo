@@ -189,18 +189,41 @@ python3 scripts/poll_task.py <job_name>
 （如有）
 ```
 
-### Step 5: 发送邮件
+### Step 5: 保存转录原文为附件
 
-将会议纪要 + 完整转录原文写入 HTML 文件，然后通过 imap-smtp-email skill 发送：
+**必须**将完整转录原文保存为 txt 文件，作为邮件附件发送：
+
+```python
+# 从 S3 获取原始转录并保存
+import boto3, json
+s3 = boto3.client('s3', region_name='<your-region>')
+obj = s3.get_object(Bucket='<your-bucket>', Key='transcripts/<job_name>.json')
+data = json.loads(obj['Body'].read().decode('utf-8'))
+text = data['results']['transcripts'][0]['transcript']
+with open('/tmp/transcript.txt', 'w') as f:
+    f.write(text)
+```
+
+### Step 6: 发送邮件
+
+将会议纪要（HTML）+ 转录原文（txt 附件）一起发送：
 
 ```bash
 node <path-to-imap-smtp-email>/scripts/smtp.js send \
   --to <your-email> \
   --subject "[会议纪要] <主题> - $(date +%Y-%m-%d)" \
-  --html --body-file /tmp/meeting-minutes-email.html
+  --html --body-file /tmp/meeting-minutes-email.html \
+  --attach /tmp/transcript.txt
 ```
 
-### Step 6: 会话回复
+**⚠️ 重要：每次都必须附带转录原文 txt 附件，不管文本长短。**
+
+**邮件结构：**
+1. 会议纪要（结构化摘要）— HTML 正文
+2. 转录原文（完整文本）— txt 附件
+3. 页脚（自动生成信息）
+
+### Step 7: 会话回复
 
 ```
 📝 会议纪要已生成！
