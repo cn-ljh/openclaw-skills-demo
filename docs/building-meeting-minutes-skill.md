@@ -1,6 +1,6 @@
 # 从零构建 OpenClaw Skill：以 meeting-minutes 为例
 
-> 通过与 OpenClaw AI 助手对话，从零构建一个会议纪要自动化 Skill 的完整过程。无需写代码，40 分钟完成。
+> 通过与 OpenClaw AI 助手对话，从零构建一个会议纪要自动化 Skill 的完整过程。无需写代码，10 分钟完成。
 
 ## 最终成果
 
