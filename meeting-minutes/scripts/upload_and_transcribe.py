@@ -4,7 +4,10 @@
 直接调用 AWS API（boto3），不依赖任何中间 Serverless 服务。
 
 用法:
-  python3 upload_and_transcribe.py <audio_file_path>
+  python3 upload_and_transcribe.py <audio_file_path> [--lang <code>]
+
+  --lang <code>  指定语言代码（如 en-US, zh-CN, ja-JP）
+                 不指定时自动检测语言（Transcribe IdentifyLanguage）
 
 输出 (stdout):
   TASK_ID=<transcribe_job_name>
@@ -12,40 +15,43 @@
 环境要求:
   - AWS 凭证已配置（IAM role / env vars / ~/.aws/credentials）
   - 权限: s3:PutObject, transcribe:StartTranscriptionJob
-  - 配置: 编辑 config.py 中的 S3_BUCKET, AWS_REGION 等
 """
 import sys
 import os
 import uuid
+import argparse
 import boto3
 from datetime import datetime, timezone
 
-# 导入配置
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from config import (
-    S3_BUCKET, S3_PREFIX, AWS_REGION,
-    LANGUAGE_CODE, MAX_SPEAKER_LABELS,
-    SUPPORTED_EXTENSIONS, MEDIA_FORMAT_MAP,
-)
+S3_BUCKET = '<YOUR_S3_BUCKET>'
+S3_PREFIX = 'audio'
+AWS_REGION = 'us-west-2'
+MAX_SPEAKER_LABELS = 10
 
-
-def validate_config():
-    """检查配置是否已填写"""
-    if S3_BUCKET.startswith('<') or not S3_BUCKET:
-        print("ERROR: Please configure S3_BUCKET in scripts/config.py", file=sys.stderr)
-        print("  1. Create a bucket: aws s3 mb s3://your-bucket --region us-west-2", file=sys.stderr)
-        print("  2. Edit scripts/config.py and set S3_BUCKET", file=sys.stderr)
-        sys.exit(1)
+SUPPORTED_EXTENSIONS = {'mp3', 'mp4', 'wav', 'm4a', 'flac', 'ogg', 'webm', 'amr', 'aac'}
+MEDIA_FORMAT_MAP = {
+    'mp3': 'mp3',
+    'mp4': 'mp4',
+    'wav': 'wav',
+    'm4a': 'mp4',
+    'flac': 'flac',
+    'ogg': 'ogg',
+    'webm': 'webm',
+    'amr': 'amr',
+    'aac': 'mp4',
+}
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python3 upload_and_transcribe.py <audio_file_path>", file=sys.stderr)
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description='Upload audio and start AWS Transcribe job')
+    parser.add_argument('file_path', help='Path to audio file')
+    parser.add_argument('--lang', default=None,
+                        help='Language code (e.g. en-US, zh-CN, ja-JP). '
+                             'Omit for automatic language detection.')
+    args = parser.parse_args()
 
-    validate_config()
-
-    file_path = sys.argv[1]
+    file_path = args.file_path
+    lang_code = args.lang
 
     if not os.path.exists(file_path):
         print(f"ERROR: File not found: {file_path}", file=sys.stderr)
@@ -75,12 +81,10 @@ def main():
     media_format = MEDIA_FORMAT_MAP.get(ext, 'mp4')
 
     # Start Transcribe job
-    print(f"Starting Transcribe job: {job_name} ...", file=sys.stderr)
     transcribe = boto3.client('transcribe', region_name=AWS_REGION)
 
     params = {
         'TranscriptionJobName': job_name,
-        'LanguageCode': LANGUAGE_CODE,
         'MediaFormat': media_format,
         'Media': {'MediaFileUri': s3_uri},
         'OutputBucketName': S3_BUCKET,
@@ -91,10 +95,23 @@ def main():
         },
     }
 
+    if lang_code:
+        # 指定语言
+        params['LanguageCode'] = lang_code
+        print(f"Starting Transcribe job: {job_name} (language: {lang_code}) ...", file=sys.stderr)
+    else:
+        # 自动语言检测 — 支持中英日韩法德西等常见语言
+        params['IdentifyLanguage'] = True
+        params['LanguageOptions'] = [
+            'zh-CN', 'en-US', 'ja-JP', 'ko-KR',
+            'fr-FR', 'de-DE', 'es-ES', 'pt-BR',
+        ]
+        print(f"Starting Transcribe job: {job_name} (auto-detect language) ...", file=sys.stderr)
+
     transcribe.start_transcription_job(**params)
     print(f"Transcribe job started: {job_name}", file=sys.stderr)
 
-    # Machine-readable output on stdout
+    # Machine-readable output
     print(f"TASK_ID={job_name}")
 
 
